@@ -30,14 +30,6 @@ async function runPipeline() {
 
     console.log(`[3/4] Sending emails to ${contacts.length} contacts...`);
 
-
-    const confirm = await askQuestion(`About to send ${contacts.slice(0, 3).length} emails. Proceed? (yes/no): `);
-    if (confirm.trim().toLowerCase() !== "yes") {
-      console.log("Aborted.");
-      rl.close();
-      return;
-    }
-
     for (const contact of contacts.slice(0, 3)) {
       const emailBody = generateEmail(contact, company);
 

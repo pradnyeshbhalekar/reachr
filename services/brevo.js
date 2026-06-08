@@ -10,8 +10,8 @@ async function sendEmail(to, subject, htmlContent) {
 
             {
                 sender: {
-                    name: "Looplearn",
-                    email: "looplearn.work@gmail.com",
+                    name: "Pradnyesh",
+                    email: "bhalekar@pradnyesh.site",
                 },
 
                 to: [

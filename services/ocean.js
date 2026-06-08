@@ -37,6 +37,7 @@ async function findSimilarCompanies(domain) {
         })
 
         return domains;
+        
     }catch(err){
         console.log("Ocean.io Error was found: ",err.message)
         return []
