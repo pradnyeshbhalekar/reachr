@@ -22,48 +22,38 @@ export default function Navbar() {
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 50,
-      background: theme === 'light' ? 'rgba(255,255,255,0.85)' : 'rgba(10,10,10,0.85)',
-      backdropFilter: 'blur(24px)',
-      WebkitBackdropFilter: 'blur(24px)',
+      background: theme === 'light' ? 'rgba(255,255,255,0.88)' : 'rgba(10,10,10,0.88)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
       borderBottom: '1px solid var(--border)',
-      height: '60px',
-      display: 'grid',
-      gridTemplateColumns: '1fr auto 1fr',
+      height: '56px',
+      display: 'flex',
       alignItems: 'center',
+      justifyContent: 'space-between',
       padding: '0 2rem',
     }}>
-      {/* Left — Logo */}
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', textDecoration: 'none', justifySelf: 'start' }}>
-        <ReachrMark />
-        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', letterSpacing: '-0.04em' }}>
-          Reachr
+      {/* Logo */}
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+        <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.04em' }}>
+          reachr
         </span>
       </Link>
 
-      {/* Center — Nav links */}
-      <div style={{
-        display: 'flex', alignItems: 'center',
-        background: 'var(--bg-secondary)',
-        border: '1px solid var(--border)',
-        borderRadius: 10,
-        padding: '3px',
-        gap: '2px',
-      }}>
+      {/* Nav + toggle */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
         {[['/', 'Home'], ['/outreach', 'Outreach']].map(([path, label]) => (
           <Link
             key={path}
             to={path}
             style={{
-              fontSize: '0.8rem',
-              fontWeight: 500,
+              fontSize: '0.875rem',
+              fontWeight: pathname === path ? 500 : 400,
               color: pathname === path ? 'var(--text-primary)' : 'var(--text-muted)',
-              padding: '0.3rem 0.9rem',
-              borderRadius: 7,
-              background: pathname === path ? 'var(--bg)' : 'transparent',
-              boxShadow: pathname === path ? 'var(--shadow-sm)' : 'none',
-              transition: 'color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease',
-              letterSpacing: '-0.01em',
               textDecoration: 'none',
+              letterSpacing: '-0.01em',
+              transition: 'color 0.15s ease',
+              paddingBottom: '2px',
+              borderBottom: pathname === path ? '1.5px solid var(--text-primary)' : '1.5px solid transparent',
             }}
             onMouseEnter={e => { if (pathname !== path) e.currentTarget.style.color = 'var(--text-secondary)' }}
             onMouseLeave={e => { if (pathname !== path) e.currentTarget.style.color = 'var(--text-muted)' }}
@@ -71,23 +61,20 @@ export default function Navbar() {
             {label}
           </Link>
         ))}
-      </div>
 
-      {/* Right — Theme toggle */}
-      <div style={{ justifySelf: 'end' }}>
         <button
           onClick={toggle}
           aria-label="Toggle theme"
           style={{
-            width: 32, height: 32, borderRadius: 8,
+            width: 30, height: 30, borderRadius: 7,
             border: '1px solid var(--border)',
-            background: 'var(--bg-secondary)',
+            background: 'transparent',
             color: 'var(--text-muted)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', transition: 'background 0.15s ease, color 0.15s ease',
+            cursor: 'pointer', transition: 'color 0.15s ease, border-color 0.15s ease',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.style.color = 'var(--text-primary)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-muted)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.borderColor = 'var(--border-strong)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)' }}
         >
           {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
         </button>
