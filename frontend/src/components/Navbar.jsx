@@ -22,68 +22,72 @@ export default function Navbar() {
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 50,
+      background: theme === 'light' ? 'rgba(255,255,255,0.85)' : 'rgba(10,10,10,0.85)',
+      backdropFilter: 'blur(24px)',
+      WebkitBackdropFilter: 'blur(24px)',
       borderBottom: '1px solid var(--border)',
-      background: theme === 'light' ? 'rgba(255,255,255,0.9)' : 'rgba(10,10,10,0.9)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      padding: '0 2.5rem',
-      height: '56px',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      height: '60px',
+      display: 'grid',
+      gridTemplateColumns: '1fr auto 1fr',
+      alignItems: 'center',
+      padding: '0 2rem',
     }}>
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+      {/* Left — Logo */}
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', textDecoration: 'none', justifySelf: 'start' }}>
         <ReachrMark />
-        <span style={{ fontWeight: 600, fontSize: '1rem', color: 'var(--text-primary)', letterSpacing: '-0.04em' }}>
+        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)', letterSpacing: '-0.04em' }}>
           Reachr
         </span>
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+      {/* Center — Nav links */}
+      <div style={{
+        display: 'flex', alignItems: 'center',
+        background: 'var(--bg-secondary)',
+        border: '1px solid var(--border)',
+        borderRadius: 10,
+        padding: '3px',
+        gap: '2px',
+      }}>
         {[['/', 'Home'], ['/outreach', 'Outreach']].map(([path, label]) => (
           <Link
             key={path}
             to={path}
             style={{
-              fontSize: '0.875rem',
+              fontSize: '0.8rem',
               fontWeight: 500,
               color: pathname === path ? 'var(--text-primary)' : 'var(--text-muted)',
-              padding: '0.4rem 0.9rem',
-              borderRadius: 8,
-              background: 'transparent',
-              transition: 'color 0.15s ease, background 0.15s ease',
+              padding: '0.3rem 0.9rem',
+              borderRadius: 7,
+              background: pathname === path ? 'var(--bg)' : 'transparent',
+              boxShadow: pathname === path ? 'var(--shadow-sm)' : 'none',
+              transition: 'color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease',
               letterSpacing: '-0.01em',
               textDecoration: 'none',
-              position: 'relative',
             }}
-            onMouseEnter={e => { if (pathname !== path) { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'var(--bg-secondary)' } }}
-            onMouseLeave={e => { e.currentTarget.style.color = pathname === path ? 'var(--text-primary)' : 'var(--text-muted)'; e.currentTarget.style.background = 'transparent' }}
+            onMouseEnter={e => { if (pathname !== path) e.currentTarget.style.color = 'var(--text-secondary)' }}
+            onMouseLeave={e => { if (pathname !== path) e.currentTarget.style.color = 'var(--text-muted)' }}
           >
             {label}
-            {pathname === path && (
-              <span style={{
-                position: 'absolute', bottom: 2, left: '50%',
-                transform: 'translateX(-50%)',
-                width: 4, height: 4, borderRadius: '50%',
-                background: 'var(--text-primary)',
-              }} />
-            )}
           </Link>
         ))}
+      </div>
 
-        <div style={{ width: 1, height: 16, background: 'var(--border)', margin: '0 0.4rem' }} />
-
+      {/* Right — Theme toggle */}
+      <div style={{ justifySelf: 'end' }}>
         <button
           onClick={toggle}
           aria-label="Toggle theme"
           style={{
             width: 32, height: 32, borderRadius: 8,
             border: '1px solid var(--border)',
-            background: 'transparent',
+            background: 'var(--bg-secondary)',
             color: 'var(--text-muted)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', transition: 'background 0.15s ease, color 0.15s ease, border-color 0.15s ease',
+            cursor: 'pointer', transition: 'background 0.15s ease, color 0.15s ease',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-primary)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-tertiary)'; e.currentTarget.style.color = 'var(--text-primary)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-secondary)'; e.currentTarget.style.color = 'var(--text-muted)' }}
         >
           {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
         </button>
