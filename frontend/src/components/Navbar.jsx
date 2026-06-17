@@ -34,6 +34,7 @@ export default function Navbar() {
     }}>
       {/* Logo */}
       <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+        <ReachrMark />
         <span style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.04em' }}>
           reachr
         </span>
