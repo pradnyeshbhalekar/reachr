@@ -12,7 +12,7 @@ async function prospeoPost(url, body) {
     } catch (err) {
         const code = err.response?.data?.error_code;
         if (code === "Rate limit exceeded") {
-            await new Promise(r => setTimeout(r, 12000));
+            await new Promise(r => setTimeout(r, 20000));
             return axios.post(url, body, config);
         }
         throw err;

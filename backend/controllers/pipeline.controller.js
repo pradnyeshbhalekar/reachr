@@ -1,14 +1,10 @@
 const { findSimilarCompanies } = require("../services/ocean");
-const { findCEO } = require("../services/prospeo");
-const { sendEmail } = require("../services/brevo");
-const { generateEmail } = require("../utils/generateEmail");
+const { findCEO } = require("../services/hunter");
 
-// SSE helper
 function sseWrite(res, event, data) {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 }
 
-// Phase 1: discover companies + contacts, stream progress via SSE
 async function discoverPipeline(req, res) {
     const { domain } = req.body;
 
@@ -36,7 +32,7 @@ async function discoverPipeline(req, res) {
 
         const results = [];
 
-        for (const company of companies) {
+        for (const company of companies.slice(0, 1)) {
             sseWrite(res, "progress", { message: `Looking up decision maker at ${company}…`, status: "running" });
 
             const contact = await findCEO(company);
@@ -45,7 +41,6 @@ async function discoverPipeline(req, res) {
                 sseWrite(res, "progress", { message: `No contact found for ${company}.`, status: "skip" });
                 results.push({ domain: company, contact: null });
             } else {
-                const emailDraft = generateEmail(contact, company);
                 sseWrite(res, "progress", {
                     message: `Found ${contact.name || "contact"} at ${company}.`,
                     status: "done",
@@ -56,14 +51,11 @@ async function discoverPipeline(req, res) {
                         name: contact.name,
                         title: contact.title,
                         linkedin: contact.linkedin,
-                        email: contact.email,
-                        maskedEmail: contact.maskedEmail,
                     },
-                    emailDraft,
                 });
             }
 
-            await new Promise((r) => setTimeout(r, 1500));
+            await new Promise((r) => setTimeout(r, 500));
         }
 
         sseWrite(res, "complete", {
@@ -80,35 +72,4 @@ async function discoverPipeline(req, res) {
     }
 }
 
-// Phase 2: send emails with (possibly edited) drafts
-async function sendEmails(req, res) {
-    const { contacts } = req.body;
-    // contacts: [{ name, email, emailBody }]
-
-    if (!contacts || !Array.isArray(contacts)) {
-        return res.status(400).json({ error: "contacts array is required" });
-    }
-
-    const results = [];
-
-    for (const c of contacts) {
-        if (!c.email) {
-            results.push({ name: c.name, status: "no_email" });
-            continue;
-        }
-        try {
-            await sendEmail(
-                c.email,
-                `Quick note, ${(c.name || "there").split(" ")[0]}`,
-                `<pre>${c.emailBody}</pre>`
-            );
-            results.push({ name: c.name, email: c.email, status: "sent" });
-        } catch (err) {
-            results.push({ name: c.name, email: c.email, status: "failed", error: err.message });
-        }
-    }
-
-    res.json({ results });
-}
-
-module.exports = { discoverPipeline, sendEmails };
+module.exports = { discoverPipeline };
