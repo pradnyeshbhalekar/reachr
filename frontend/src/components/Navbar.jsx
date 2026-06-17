@@ -68,14 +68,14 @@ export default function Navbar() {
           aria-label="Toggle theme"
           style={{
             width: 30, height: 30, borderRadius: 7,
-            border: '1px solid var(--border)',
+            border: 'none',
             background: 'transparent',
             color: 'var(--text-muted)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', transition: 'color 0.15s ease, border-color 0.15s ease',
+            cursor: 'pointer', transition: 'color 0.15s ease',
           }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.borderColor = 'var(--border-strong)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+          onMouseEnter={e => e.currentTarget.style.color = 'var(--text-primary)'}
+          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
         >
           {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
         </button>
