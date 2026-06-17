@@ -36,10 +36,8 @@ async function sendEmail(to, subject, htmlContent) {
         return response.data;
 
     } catch (err) {
-
-        console.log(
-            "Brevo Error:",err.response?.data || err.message
-        );
+        console.log("Brevo Error:", err.response?.data || err.message);
+        throw err;
     }
 }
 
