@@ -63,7 +63,7 @@ export default function Outreach() {
     setShowSteps(true)
 
     try {
-      const res = await fetch('http://localhost:3000/pipeline/discover', {
+      const res = await fetch('${import.meta.env.VITE_API_URL}/pipeline/discover', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: domain.trim() }),
@@ -113,7 +113,7 @@ export default function Outreach() {
   async function generateMessage(i, r) {
     setGenerating(prev => ({ ...prev, [i]: true }))
     try {
-      const res = await fetch('http://localhost:3000/generate-message', {
+      const res = await fetch('${import.meta.env.VITE_API_URL}/generate-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
