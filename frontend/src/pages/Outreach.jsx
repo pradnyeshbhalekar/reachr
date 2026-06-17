@@ -22,11 +22,11 @@ const STEP_ICON = {
 }
 
 export default function Outreach() {
-  // Intent
-  const [userName, setUserName] = useState('')
-  const [userBio,  setUserBio]  = useState('')
-  const [goal,     setGoal]     = useState('job')
-  const [intentDone, setIntentDone] = useState(false)
+  // Intent — persisted to localStorage
+  const [userName, setUserName] = useState(() => localStorage.getItem('reachr_userName') || '')
+  const [userBio,  setUserBio]  = useState(() => localStorage.getItem('reachr_userBio')  || '')
+  const [goal,     setGoal]     = useState(() => localStorage.getItem('reachr_goal')     || 'job')
+  const [intentDone, setIntentDone] = useState(() => !!localStorage.getItem('reachr_userName'))
 
   // Pipeline
   const [domain, setDomain]     = useState('')
@@ -63,7 +63,7 @@ export default function Outreach() {
     setShowSteps(true)
 
     try {
-      const res = await fetch('${import.meta.env.VITE_API_URL}/pipeline/discover', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/pipeline/discover`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ domain: domain.trim() }),
@@ -113,7 +113,7 @@ export default function Outreach() {
   async function generateMessage(i, r) {
     setGenerating(prev => ({ ...prev, [i]: true }))
     try {
-      const res = await fetch('${import.meta.env.VITE_API_URL}/generate-message', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/generate-message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -192,7 +192,7 @@ export default function Outreach() {
               <div>
                 <label style={labelStyle}>Your name</label>
                 <input
-                  type="text" placeholder="e.g. Pradnyesh"
+                  type="text" placeholder="e.g. Joe Mama"
                   value={userName} onChange={e => setUserName(e.target.value)}
                   style={inputStyle}
                   onFocus={e => { e.target.style.borderColor = 'var(--border-strong)'; e.target.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.06)' }}
@@ -243,7 +243,12 @@ export default function Outreach() {
           {/* Card footer */}
           <div style={{ padding: '1rem 1.75rem', borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
             <button
-              onClick={() => setIntentDone(true)}
+              onClick={() => {
+                  localStorage.setItem('reachr_userName', userName)
+                  localStorage.setItem('reachr_userBio',  userBio)
+                  localStorage.setItem('reachr_goal',     goal)
+                  setIntentDone(true)
+                }}
               disabled={!userName.trim() || !userBio.trim()}
               style={{
                 width: '100%',

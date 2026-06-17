@@ -6,7 +6,9 @@ const { discoverPipeline } = require("./controllers/pipeline.controller");
 const { generateMessages } = require("./services/ai");
 
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:5173', 'https://reachr.onrender.com'],
+}));
 app.use(express.json());
 
 app.post("/pipeline/discover", apiLimiter, discoverPipeline);
