@@ -1,6 +1,6 @@
 require('dotenv').config()
 const {findSimilarCompanies} = require('./services/ocean')
-const {findDecisionMakers} = require('./services/prospeo')
+const {findCEO} = require('./services/prospeo')
 const { sendEmail } = require("./services/brevo");
 const { generateEmail } = require("./utils/generateEmail");
 
@@ -26,16 +26,17 @@ async function runPipeline() {
   const companies = await findSimilarCompanies(domain);
 
   for (const company of companies.slice(0, 1)) {
-    const contacts = await findDecisionMakers(company);
+    const contact = await findCEO(company);
+    const contacts = contact ? [contact] : [];
 
     console.log(`[3/4] Sending emails to ${contacts.length} contacts...`);
 
     for (const contact of contacts.slice(0, 3)) {
       const emailBody = generateEmail(contact, company);
 
-      console.log(`[4/4] Sending to ${contact.email}...`);
+      console.log(`[4/4] Sending to ${contact.maskedEmail}...`);
       await sendEmail(
-        contact.email,
+        contact.maskedEmail,
         `Quick note, ${contact.name.split(" ")[0]}`,
         `<pre>${emailBody}</pre>`
       );
