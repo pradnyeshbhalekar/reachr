@@ -18,11 +18,14 @@ async function discoverPipeline(req, res) {
     res.flushHeaders();
 
     try {
+        console.log(`[pipeline] start domain=${domain}`);
         sseWrite(res, "progress", { message: `Searching for companies similar to ${domain}…`, status: "running" });
 
         const companies = await findSimilarCompanies(domain);
+        console.log(`[pipeline] findSimilarCompanies -> ${companies.length} companies:`, companies);
 
         if (companies.length === 0) {
+            console.log("[pipeline] no companies found, ending");
             sseWrite(res, "progress", { message: "No similar companies found.", status: "done" });
             sseWrite(res, "complete", { inputDomain: domain, totalCompanies: 0, results: [] });
             return res.end();
@@ -33,9 +36,11 @@ async function discoverPipeline(req, res) {
         const results = [];
 
         for (const company of companies.slice(0, 1)) {
+            console.log(`[pipeline] looking up decision maker for ${company}`);
             sseWrite(res, "progress", { message: `Looking up decision maker at ${company}…`, status: "running" });
 
             const contact = await findCEO(company);
+            console.log(`[pipeline] findCEO(${company}) ->`, contact);
 
             if (!contact) {
                 sseWrite(res, "progress", { message: `No contact found for ${company}.`, status: "skip" });
@@ -58,6 +63,7 @@ async function discoverPipeline(req, res) {
             await new Promise((r) => setTimeout(r, 500));
         }
 
+        console.log(`[pipeline] complete, totalCompanies=${companies.length}, results=`, results);
         sseWrite(res, "complete", {
             inputDomain: domain,
             totalCompanies: companies.length,
@@ -66,7 +72,7 @@ async function discoverPipeline(req, res) {
 
         res.end();
     } catch (err) {
-        console.error("Discover error:", err.message);
+        console.error("[pipeline] Discover error:", err.message);
         sseWrite(res, "error", { message: err.message });
         res.end();
     }

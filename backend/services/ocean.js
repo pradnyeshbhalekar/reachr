@@ -9,7 +9,7 @@ async function findSimilarCompanies(domain) {
         const response = await axios.post(
             "https://api.ocean.io/v3/search/companies",
              {
-                size: 10,
+                size: 1,
                 companiesFilters: {
                 lookalikeDomains: [domain],
             },
@@ -40,6 +40,10 @@ async function findSimilarCompanies(domain) {
         
     }catch(err){
         console.log("Ocean.io Error was found: ",err.message)
+        if (err.response) {
+            console.log("Ocean.io status:", err.response.status)
+            console.log("Ocean.io response body:", JSON.stringify(err.response.data))
+        }
         return []
     }
 }
