@@ -56,6 +56,7 @@ async function discoverPipeline(req, res) {
                         name: contact.name,
                         title: contact.title,
                         linkedin: contact.linkedin,
+                        email: contact.email,
                     },
                 });
             }

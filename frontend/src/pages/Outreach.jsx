@@ -2,8 +2,9 @@ import { useState, useRef } from 'react'
 import {
   Search, Loader2, Building2, ExternalLink,
   ChevronDown, AlertCircle, CheckCircle2, Circle,
-  SkipForward, ArrowRight, Copy, Check, Sparkles
+  SkipForward, ArrowRight, Copy, Check, Sparkles, Send
 } from 'lucide-react'
+import { useAuth } from '../AuthContext'
 
 const EXAMPLES = ['stripe.com', 'notion.so', 'linear.app', 'vercel.com']
 
@@ -22,6 +23,8 @@ const STEP_ICON = {
 }
 
 export default function Outreach() {
+  const { isAuthenticated, token, login } = useAuth()
+
   // Intent — persisted to localStorage
   const [userName, setUserName] = useState(() => localStorage.getItem('reachr_userName') || '')
   const [userBio,  setUserBio]  = useState(() => localStorage.getItem('reachr_userBio')  || '')
@@ -40,6 +43,9 @@ export default function Outreach() {
   const [messages,  setMessages]  = useState({})   // { [i]: { linkedin, cold } }
   const [generating, setGenerating] = useState({}) // { [i]: bool }
   const [copied,    setCopied]    = useState({})   // { [key]: bool }
+  const [sending,   setSending]   = useState({})   // { [i]: bool }
+  const [sentEmail, setSentEmail] = useState({})   // { [i]: bool }
+  const [sendError, setSendError] = useState({})   // { [i]: string }
 
   const stepsEndRef = useRef(null)
 
@@ -137,6 +143,34 @@ export default function Outreach() {
     navigator.clipboard.writeText(text)
     setCopied(prev => ({ ...prev, [key]: true }))
     setTimeout(() => setCopied(prev => ({ ...prev, [key]: false })), 2000)
+  }
+
+  async function sendEmail(i, r) {
+    if (!isAuthenticated) return login()
+
+    setSending(prev => ({ ...prev, [i]: true }))
+    setSendError(prev => ({ ...prev, [i]: null }))
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          to: r.contact.email,
+          subject: messages[i].subject || `Quick note, ${r.contact.name}`,
+          body: messages[i].cold,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to send')
+      }
+      setSentEmail(prev => ({ ...prev, [i]: true }))
+      setTimeout(() => setSentEmail(prev => ({ ...prev, [i]: false })), 2000)
+    } catch (err) {
+      setSendError(prev => ({ ...prev, [i]: err.message }))
+    } finally {
+      setSending(prev => ({ ...prev, [i]: false }))
+    }
   }
 
   const busy = phase === 'discovering'
@@ -537,7 +571,15 @@ export default function Outreach() {
                             copyKey={`${i}-cold`}
                             copied={copied[`${i}-cold`]}
                             onCopy={() => copyText(`${i}-cold`, messages[i].cold)}
+                            onSend={() => sendEmail(i, r)}
+                            sending={sending[i]}
+                            sent={sentEmail[i]}
+                            sendDisabled={!r.contact.email}
+                            sendDisabledReason={!r.contact.email ? 'No verified email found for this contact' : null}
                           />
+                          {sendError[i] && (
+                            <p style={{ fontSize: '0.78rem', color: '#dc2626' }}>{sendError[i]}</p>
+                          )}
                         </div>
                       )}
 
@@ -588,7 +630,7 @@ export default function Outreach() {
 
 // ── Sub-components ────────────────────────────────────────────
 
-function MessageBox({ label, text, onCopy, copied, charLimit }) {
+function MessageBox({ label, text, onCopy, copied, charLimit, onSend, sending, sent, sendDisabled, sendDisabledReason }) {
   return (
     <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.75rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)' }}>
@@ -602,16 +644,39 @@ function MessageBox({ label, text, onCopy, copied, charLimit }) {
             </span>
           )}
         </div>
-        <button onClick={onCopy} style={{
-          display: 'flex', alignItems: 'center', gap: '0.3rem',
-          fontSize: '0.7rem', fontWeight: 500,
-          color: copied ? '#16a34a' : 'var(--text-muted)',
-          background: 'transparent', border: 'none', cursor: 'pointer',
-          transition: 'var(--transition-fast)',
-        }}>
-          {copied ? <Check size={12} /> : <Copy size={12} />}
-          {copied ? 'Copied!' : 'Copy'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          {onSend && (
+            <button
+              onClick={onSend}
+              disabled={sending || sendDisabled}
+              title={sendDisabledReason || 'Send from your Gmail account'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                fontSize: '0.7rem', fontWeight: 500,
+                color: sendDisabled ? 'var(--text-muted)' : sent ? '#16a34a' : 'var(--text-muted)',
+                opacity: sendDisabled ? 0.5 : 1,
+                background: 'transparent', border: 'none',
+                cursor: sendDisabled ? 'not-allowed' : 'pointer',
+                transition: 'var(--transition-fast)',
+              }}
+            >
+              {sending
+                ? <Loader2 size={12} style={{ animation: 'spin 0.8s linear infinite' }} />
+                : sent ? <Check size={12} /> : <Send size={12} />}
+              {sending ? 'Sending…' : sent ? 'Sent!' : 'Send'}
+            </button>
+          )}
+          <button onClick={onCopy} style={{
+            display: 'flex', alignItems: 'center', gap: '0.3rem',
+            fontSize: '0.7rem', fontWeight: 500,
+            color: copied ? '#16a34a' : 'var(--text-muted)',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            transition: 'var(--transition-fast)',
+          }}>
+            {copied ? <Check size={12} /> : <Copy size={12} />}
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
       </div>
       <p style={{ padding: '0.75rem', margin: 0, fontSize: '0.82rem', color: 'var(--text-primary)', lineHeight: 1.65, letterSpacing: '-0.01em' }}>
         {text}

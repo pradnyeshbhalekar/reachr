@@ -1,6 +1,14 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, LogIn } from 'lucide-react'
 import { useTheme } from '../ThemeContext'
+import { useAuth } from '../AuthContext'
+
+const ADMIN_EMAIL = 'pradnyeshbhalekar78@gmail.com'
+
+function initials(name) {
+  if (!name) return '?'
+  return name.split(' ').filter(Boolean).slice(0, 2).map(p => p[0].toUpperCase()).join('')
+}
 
 function ReachrMark() {
   return (
@@ -18,6 +26,7 @@ function ReachrMark() {
 export default function Navbar() {
   const { pathname } = useLocation()
   const { theme, toggle } = useTheme()
+  const { isAuthenticated, user, login, logout } = useAuth()
 
   return (
     <nav style={{
@@ -42,7 +51,11 @@ export default function Navbar() {
 
       {/* Nav + toggle */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        {[['/', 'Home'], ['/outreach', 'Outreach']].map(([path, label]) => (
+        {[
+          ['/', 'Home'],
+          ['/outreach', 'Outreach'],
+          ...(user?.email === ADMIN_EMAIL ? [['/admin', 'Admin']] : []),
+        ].map(([path, label]) => (
           <Link
             key={path}
             to={path}
@@ -79,6 +92,44 @@ export default function Navbar() {
         >
           {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
         </button>
+
+        {isAuthenticated ? (
+          <button
+            onClick={logout}
+            title={user?.email}
+            aria-label="Sign out"
+            style={{
+              width: 28, height: 28, borderRadius: '50%',
+              border: 'none',
+              background: 'var(--text-primary)',
+              color: 'var(--bg-primary, #fff)',
+              fontSize: '0.7rem', fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            {initials(user?.name)}
+          </button>
+        ) : (
+          <button
+            onClick={login}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+              padding: '0.4rem 0.75rem',
+              borderRadius: 7,
+              border: '1px solid var(--border)',
+              background: 'transparent',
+              color: 'var(--text-primary)',
+              fontSize: '0.8125rem', fontWeight: 500,
+              cursor: 'pointer', transition: 'border-color 0.15s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--text-muted)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border)'}
+          >
+            <LogIn size={13} />
+            Sign in
+          </button>
+        )}
       </div>
     </nav>
   )

@@ -1,9 +1,14 @@
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
+require("./db");
 const express = require("express");
 const cors = require("cors");
-const { apiLimiter } = require("./middleware/rateLimit");
+const { apiLimiter, authLimiter } = require("./middleware/rateLimit");
+const { authMiddleware } = require("./middleware/auth");
 const { discoverPipeline } = require("./controllers/pipeline.controller");
 const { generateMessages } = require("./services/ai");
+const authController = require("./controllers/auth.controller");
+const { sendEmailHandler } = require("./controllers/email.controller");
+const betaController = require("./controllers/beta.controller");
 
 const app = express();
 app.use(cors({
@@ -12,6 +17,15 @@ app.use(cors({
 app.use(express.json());
 
 app.post("/pipeline/discover", apiLimiter, discoverPipeline);
+
+app.get("/auth/google", authLimiter, authController.googleLogin);
+app.get("/auth/google/callback", authLimiter, authController.googleCallback);
+app.get("/auth/me", authMiddleware, authController.me);
+app.post("/send-email", authLimiter, authMiddleware, sendEmailHandler);
+
+app.post("/beta/register", apiLimiter, betaController.register);
+app.get("/beta/approve/:id", betaController.approve);
+app.get("/admin/beta-signups", authMiddleware, betaController.listSignups);
 
 app.post("/generate-message", async (req, res) => {
     const { contact, company, userName, userBio, goal } = req.body;
