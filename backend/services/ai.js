@@ -20,27 +20,29 @@ They are reaching out to:
 - Title: ${contact.title || "Leader"}
 - Company: ${company}
 
-Write two messages:
+Write:
 1. A LinkedIn connection note (max 160 characters, warm and personal, no hashtags)
 2. A cold outreach message (3-4 sentences, specific to their role and company, conversational tone, not salesy)
+3. A short email subject line for the cold outreach message (max 60 characters, specific and non-generic, no clickbait)
 
 Respond in this exact JSON format:
 {
   "linkedin": "...",
-  "cold": "..."
+  "cold": "...",
+  "subject": "..."
 }`;
 
     const response = await axios.post(
-        "https://models.inference.ai.azure.com/chat/completions",
+        "https://api.groq.com/openai/v1/chat/completions",
         {
-            model: "gpt-4o-mini",
+            model: "llama-3.3-70b-versatile",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
             response_format: { type: "json_object" },
         },
         {
             headers: {
-                Authorization: `Bearer ${process.env.GITHUB_AI_KEY}`,
+                Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
                 "Content-Type": "application/json",
             },
         }
