@@ -16,4 +16,12 @@ const authLimiter = rateLimit({
     message: { error: "Too many auth attempts, please try again after a minute" },
 });
 
-module.exports = { apiLimiter, authLimiter };
+const pipelineLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: "Too many pipeline runs, please try again in an hour" },
+});
+
+module.exports = { apiLimiter, authLimiter, pipelineLimiter };

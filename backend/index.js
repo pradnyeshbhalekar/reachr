@@ -2,7 +2,7 @@ require("dotenv").config({ quiet: true });
 require("./db");
 const express = require("express");
 const cors = require("cors");
-const { apiLimiter, authLimiter } = require("./middleware/rateLimit");
+const { apiLimiter, authLimiter, pipelineLimiter } = require("./middleware/rateLimit");
 const { authMiddleware } = require("./middleware/auth");
 const { discoverPipeline } = require("./controllers/pipeline.controller");
 const { generateMessages } = require("./services/ai");
@@ -16,7 +16,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.post("/pipeline/discover", apiLimiter, discoverPipeline);
+app.post("/pipeline/discover", pipelineLimiter, discoverPipeline);
 
 app.get("/auth/google", authLimiter, authController.googleLogin);
 app.get("/auth/google/callback", authLimiter, authController.googleCallback);
@@ -27,7 +27,7 @@ app.post("/beta/register", apiLimiter, betaController.register);
 app.get("/beta/approve/:id", betaController.approve);
 app.get("/admin/beta-signups", authMiddleware, betaController.listSignups);
 
-app.post("/generate-message", async (req, res) => {
+app.post("/generate-message", pipelineLimiter, async (req, res) => {
     const { contact, company, userName, userBio, goal } = req.body;
     if (!contact || !company || !userName || !goal) {
         return res.status(400).json({ error: "Missing required fields" });
