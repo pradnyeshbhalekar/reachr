@@ -75,8 +75,8 @@ export default function Admin() {
         signups.length === 0 ? (
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>No signups yet.</p>
         ) : (
-          <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+          <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+            <table style={{ width: '100%', minWidth: 560, borderCollapse: 'collapse', fontSize: '0.82rem' }}>
               <thead>
                 <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
                   {['Name', 'Email', 'Status', 'Signed in', 'Requested'].map(h => (

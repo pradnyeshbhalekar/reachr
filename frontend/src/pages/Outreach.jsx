@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Search, Loader2, Building2, ExternalLink,
   ChevronDown, AlertCircle, CheckCircle2, Circle,
@@ -23,13 +23,20 @@ const STEP_ICON = {
 }
 
 export default function Outreach() {
-  const { isAuthenticated, token, login } = useAuth()
+  const { isAuthenticated, token, login, user } = useAuth()
 
   // Intent — persisted to localStorage
-  const [userName, setUserName] = useState(() => localStorage.getItem('reachr_userName') || '')
+  const [userName, setUserName] = useState(() => localStorage.getItem('reachr_userName') || user?.name || '')
   const [userBio,  setUserBio]  = useState(() => localStorage.getItem('reachr_userBio')  || '')
   const [goal,     setGoal]     = useState(() => localStorage.getItem('reachr_goal')     || 'job')
   const [intentDone, setIntentDone] = useState(() => !!localStorage.getItem('reachr_userName'))
+
+  // Prefill name from the logged-in Google account if the user hasn't set one yet
+  useEffect(() => {
+    if (user?.name && !localStorage.getItem('reachr_userName')) {
+      setUserName(user.name)
+    }
+  }, [user])
 
   // Pipeline
   const [domain, setDomain]     = useState('')
