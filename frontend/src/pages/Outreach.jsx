@@ -146,6 +146,10 @@ export default function Outreach() {
     }
   }
 
+  function updateMessage(i, field, value) {
+    setMessages(prev => ({ ...prev, [i]: { ...prev[i], [field]: value } }))
+  }
+
   function copyText(key, text) {
     navigator.clipboard.writeText(text)
     setCopied(prev => ({ ...prev, [key]: true }))
@@ -567,6 +571,7 @@ export default function Outreach() {
                           <MessageBox
                             label="LinkedIn note"
                             text={messages[i].linkedin}
+                            onChange={v => updateMessage(i, 'linkedin', v)}
                             copyKey={`${i}-li`}
                             copied={copied[`${i}-li`]}
                             onCopy={() => copyText(`${i}-li`, messages[i].linkedin)}
@@ -575,6 +580,7 @@ export default function Outreach() {
                           <MessageBox
                             label="Cold message"
                             text={messages[i].cold}
+                            onChange={v => updateMessage(i, 'cold', v)}
                             copyKey={`${i}-cold`}
                             copied={copied[`${i}-cold`]}
                             onCopy={() => copyText(`${i}-cold`, messages[i].cold)}
@@ -637,7 +643,7 @@ export default function Outreach() {
 
 // ── Sub-components ────────────────────────────────────────────
 
-function MessageBox({ label, text, onCopy, copied, charLimit, onSend, sending, sent, sendDisabled, sendDisabledReason }) {
+function MessageBox({ label, text, onChange, onCopy, copied, charLimit, onSend, sending, sent, sendDisabled, sendDisabledReason }) {
   return (
     <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.45rem 0.75rem', borderBottom: '1px solid var(--border)', background: 'var(--bg-tertiary)' }}>
@@ -685,9 +691,17 @@ function MessageBox({ label, text, onCopy, copied, charLimit, onSend, sending, s
           </button>
         </div>
       </div>
-      <p style={{ padding: '0.75rem', margin: 0, fontSize: '0.82rem', color: 'var(--text-primary)', lineHeight: 1.65, letterSpacing: '-0.01em' }}>
-        {text}
-      </p>
+      <textarea
+        value={text}
+        onChange={e => onChange?.(e.target.value)}
+        rows={Math.min(10, Math.max(2, Math.ceil(text.length / 60)))}
+        style={{
+          display: 'block', width: '100%', padding: '0.75rem', margin: 0,
+          fontSize: '0.82rem', color: 'var(--text-primary)', lineHeight: 1.65, letterSpacing: '-0.01em',
+          fontFamily: 'inherit', background: 'transparent', border: 'none', outline: 'none',
+          resize: 'vertical', boxSizing: 'border-box',
+        }}
+      />
     </div>
   )
 }
