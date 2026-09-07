@@ -35,7 +35,7 @@ Respond in this exact JSON format:
     const response = await axios.post(
         "https://api.groq.com/openai/v1/chat/completions",
         {
-            model: "llama-3.3-70b-versatile",
+            model: "openai/gpt-oss-120b",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
             response_format: { type: "json_object" },
